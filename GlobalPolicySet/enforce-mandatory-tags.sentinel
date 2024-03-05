@@ -1,0 +1,43 @@
+import "tfplan/v2" as tfplan
+import "strings"
+import "tfplan-utils" as tfplan_utils
+import "policy-config" as config
+
+# attribute definitions from config file
+provider_name = config.global_parameters.provider_name
+mode = config.global_parameters.mode
+actions = config.global_parameters.default_actions
+mandatory_tags = config.global_parameters.mandatory_tag_keys
+allowed_resource_types = config.global_parameters.allowed_resource_types
+
+# get resources
+resources = tfplan_utils.get_resources(allowed_resource_types, provider_name, actions, mode)
+
+# rule evaluation
+mandatory_tags_enforced = true
+for resources as _,resource {
+	tag_name_list = []
+	tags_collection = resource.change.after.tags
+	if tags_collection is not null {
+		for tags_collection as tag_name{
+			append(tag_name_list,strings.to_lower(tag_name)) 
+		}
+		for mandatory_tags as t {
+			if t not in tag_name_list { 
+				mandatory_tags_enforced = false
+				break
+			} 
+		}
+	} else {
+		mandatory_tags_enforced = false
+		break
+	}
+}
+
+
+print ("Mandatory tags that should be applied:", mandatory_tags)
+
+# Mandatory tags should be applied within resource
+main = rule {
+  mandatory_tags_enforced
+}

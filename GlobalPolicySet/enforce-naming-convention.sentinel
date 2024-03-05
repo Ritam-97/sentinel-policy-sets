@@ -1,0 +1,42 @@
+import "tfplan/v2" as tfplan
+import "strings"
+import "tfplan-utils" as tfplan_utils
+import "policy-config" as config
+
+# attribute definitions from config file
+provider_name = config.global_parameters.provider_name
+mode = config.global_parameters.mode
+actions = config.global_parameters.default_actions
+mandatory_tags = config.global_parameters.mandatory_tag_keys
+allowed_resource_types = config.global_parameters.allowed_resource_types
+
+environment_list = config.global_parameters.allowed_naming_conventions.environments
+prefix_map = config.global_parameters.allowed_naming_conventions.prefix
+
+# get resources
+resources = tfplan_utils.get_resources(allowed_resource_types, provider_name, actions, mode)
+
+# rule evaluation
+naming_convention_enforced = true
+for resources as _,resource {
+    resource_type = resource.type
+    allowed_prefix_strings = tfplan_utils.generate_allowed_prefix_strings(resource_type, environment_list, prefix_map)
+    prefix_found = false
+    for allowed_prefix_strings as prefix_string {
+        if not strings.has_prefix(resource.change.after.name, prefix_string) {
+            continue
+        } else {
+            prefix_found = true
+            break
+        }
+    }
+    if prefix_found is false {
+        naming_convention_enforced = false
+        break
+    }
+}
+
+# Naming convention should be followed within resource
+main = rule {
+  naming_convention_enforced
+}

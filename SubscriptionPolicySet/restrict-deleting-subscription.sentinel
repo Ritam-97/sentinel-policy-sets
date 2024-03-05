@@ -1,0 +1,24 @@
+import "tfplan/v2" as tfplan
+import "tfplan-utils" as tfplan_utils
+import "policy-config" as config
+
+# attribute definitions from config file
+provider_name = config.global_parameters.provider_name
+mode = config.global_parameters.mode
+delete_actions = config.global_parameters.delete_actions
+resource_type = ["azurerm_subscription"] 
+
+# get subscription resources whose change action is delete
+# passing delete action as argument to filter function
+subscription_resources = tfplan_utils.get_resources(resource_type, provider_name, delete_actions, mode)
+
+# rule evaluation
+delete_subscription_action_present = false
+if subscription_resources is not {} {
+  delete_subscription_action_present = true
+}
+
+# Subscription delete action is not allowed
+main = rule {
+  not delete_subscription_action_present
+}

@@ -1,0 +1,61 @@
+{
+    "global_parameters": {
+        "provider_name": "registry.terraform.io/hashicorp/azurerm",
+        "mode": "managed",
+        "delete_actions": [
+            [
+                "delete"
+            ]
+        ],
+        "default_actions": [
+            [
+                "no-op"
+            ],
+            [
+                "create"
+            ],
+            [
+                "update"
+            ]
+        ],
+        "mandatory_tag_keys": [
+            "environment",
+            "owner",
+            "cost center"
+        ],
+        "allowed_locations": [
+            "southcentralus",
+            "northcentralus"
+        ],
+        "allowed_resource_types": [
+            "azurerm_management_group",
+            "azurerm_resource_group",
+            "azurerm_virtual_network",
+            "azurerm_subnet",
+            "azurerm_network_security_group",
+            "azurerm_kubernetes_cluster",
+            "azurerm_storage_account",
+            "azurerm_linux_virtual_machine",
+            "azurerm_windows_virtual_machine"
+        ],
+        "allowed_naming_conventions" : {
+            "environments": ["DEV","NONPROD","PROD"],
+            "prefix": {
+                "azurerm_management_group": ["EDJ-MG-","EDJ-SMG-"],
+                "azurerm_subscription": "EDJ-SUB-",
+                "azurerm_resource_group": "EDJ-RG-",
+                "azurerm_virtual_network": "",
+                "azurerm_subnet": "",
+                "azurerm_network_security_group": "",
+                "azurerm_kubernetes_cluster": "",
+                "azurerm_storage_account": "",
+                "azurerm_linux_virtual_machine": "",
+                "azurerm_windows_virtual_machine": ""
+            }
+        }
+    },
+    "environment_parameters": {
+        "non_prod": {},
+        "prod": {}
+    }
+}

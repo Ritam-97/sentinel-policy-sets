@@ -1,0 +1,27 @@
+import "tfplan/v2" as tfplan
+import "tfplan-utils" as tfplan_utils
+import "policy-config" as config
+
+# attribute definitions
+provider_name = config.global_parameters.provider_name
+allowed_locations = config.global_parameters.allowed_locations
+allowed_resource_types = config.global_parameters.allowed_resource_types
+mode = config.global_parameters.mode
+actions = config.global_parameters.default_actions
+
+# get resources
+resources = tfplan_utils.get_resources(allowed_resource_types, provider_name, actions, mode)
+
+# rule evaluation
+deploying_in_allowed_locations = rule {
+	all resources as _, resource {
+		resource.change.after.location in allowed_locations
+	}
+}
+
+print ("Allowed locations for resource deployment:", allowed_locations)
+
+# Resources must be deployed within allowed locations
+main = rule {
+	deploying_in_allowed_locations
+}

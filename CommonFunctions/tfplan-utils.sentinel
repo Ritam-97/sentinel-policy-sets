@@ -1,0 +1,49 @@
+import "tfplan/v2" as tfplan
+import "types"
+
+# common function to filter resources based on resource type
+get_resources = func(resource_type, provider_name, actions, mode) {
+  resources = filter tfplan.resource_changes as _, rc {
+    rc.provider_name is provider_name and
+    rc.type in resource_type and
+  	rc.mode is mode and
+  	rc.change.actions in actions and
+    rc.change.after is not null
+  }
+  return resources
+}
+
+# common function to get particular resource type
+get_resources_by_resource_type = func(resource_type, provider_name, actions, mode) {
+  resources = filter tfplan.resource_changes as _, rc {
+    rc.provider_name is provider_name and
+    rc.type is resource_type and
+  	rc.mode is mode and
+  	rc.change.actions in actions and
+    rc.change.after is not null
+  }
+  return resources
+}
+
+# common function to get all resources 
+get_all_resources = func(provider_name, actions, mode) {
+  resources = filter tfplan.resource_changes as _, rc {
+	  rc.provider_name is provider_name and
+    rc.mode is mode and
+    rc.change.actions in actions
+  }
+  return resources
+}
+
+# common function to generate allowed prefix strings
+generate_allowed_prefix_strings = func(resource_type, environment_list, prefix_map){
+    allowed_prefix_strings = [] 
+    if resource_type is "azurerm_management_group" {
+        for prefix_map["azurerm_management_group"] as item {
+            append(allowed_prefix_strings,item)
+        }
+    } else {
+        append(allowed_prefix_strings,prefix_map[resource_type])
+    }
+    return allowed_prefix_strings
+}

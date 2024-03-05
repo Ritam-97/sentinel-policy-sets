@@ -1,0 +1,26 @@
+import "tfplan/v2" as tfplan
+import "tfplan-utils" as tfplan_utils
+import "policy-config" as config
+
+# attribute definitions from config file
+provider_name = config.global_parameters.provider_name
+mode = config.global_parameters.mode
+actions = config.global_parameters.default_actions
+allowed_resource_types = config.global_parameters.allowed_resource_types
+
+# get resources
+resources = tfplan_utils.get_all_resources(provider_name, actions, mode)
+
+# rule evaluation
+deploying_allowed_resource_type = rule {
+	all resources as _, resource {
+		resource.type in allowed_resource_types
+	}
+}
+
+print ("Allowed resource types for deployement:", allowed_resource_types)
+
+# Resources must be deployed as per allowed types
+main = rule {
+	deploying_allowed_resource_type
+}
